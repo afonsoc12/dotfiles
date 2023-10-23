@@ -48,6 +48,9 @@
       - ansible.cfg
       - dotfiles.yml
       - .DS_Store
+      - .ansible-lint
+      - .gitignore
+      - .yamllint
   register: dotfiles_files_in_repo_root
 
 - name: Process dotfiles files locations
