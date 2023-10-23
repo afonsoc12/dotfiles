@@ -36,19 +36,19 @@ jobs:
           ansible-lint
 
       - name: Test playbook's syntax
-        run: ansible-playbook main.yml --syntax-check
+        run: ansible-playbook dotfiles.yml --syntax-check
 
       - name: Playbook dry-run
-        run: ansible-playbook main.yml --check
+        run: ansible-playbook dotfiles.yml --check
 
       - name: Test playbook
         run: |
-          ansible-playbook main.yml
+          ansible-playbook dotfiles.yml
 
       - name: Idempotence check
         run: |
           idempotence=$(mktemp)
-          ansible-playbook main.yml --skip-tags dock | tee -a ${idempotence}
+          ansible-playbook dotfiles.yml --skip-tags dock | tee -a ${idempotence}
           tail ${idempotence} | grep -q 'changed=0.*failed=0' \
               && (echo 'Idempotence test: pass' && exit 0) \
               || (echo 'Idempotence test: fail' && exit 1)
