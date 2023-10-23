@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Ansible
         run: |
-          pip3 install --upgrade ansible
+          pip3 install --upgrade ansible ansible-lint yamllint
 
       - name: Linting
         run: |
