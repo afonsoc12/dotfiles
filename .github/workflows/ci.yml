@@ -1,0 +1,58 @@
+---
+name: CI
+on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+
+  integraton-tests:
+    name: Integration Tests
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-12]
+
+    defaults:
+      run:
+        shell: zsh {0}
+
+    env:
+      ANSIBLE_FORCE_COLOR: '1'
+      ANSIBLE_HOME: $HOME/.local/share/ansible
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          pip3 install --upgrade ansible
+
+      - name: Linting
+        run: |
+          yamllint .
+          ansible-lint
+
+      - name: Test playbook's syntax
+        run: ansible-playbook main.yml --syntax-check
+
+      - name: Playbook dry-run
+        run: ansible-playbook main.yml --check
+
+      - name: Test playbook
+        run: |
+          ansible-playbook main.yml
+
+      - name: Idempotence check
+        run: |
+          idempotence=$(mktemp)
+          ansible-playbook main.yml --skip-tags dock | tee -a ${idempotence}
+          tail ${idempotence} | grep -q 'changed=0.*failed=0' \
+              && (echo 'Idempotence test: pass' && exit 0) \
+              || (echo 'Idempotence test: fail' && exit 1)
