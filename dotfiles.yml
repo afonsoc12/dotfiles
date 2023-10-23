@@ -1,0 +1,13 @@
+---
+- name: Install dotfiles
+  hosts: localhost
+
+  vars:
+    dotfiles_repo_dest: "{{ playbook_dir }}"
+
+  tasks:
+    - include_tasks: "{{ task }}"
+      with_fileglob:
+        - tasks/*.yml
+      loop_control:
+        loop_var: task
