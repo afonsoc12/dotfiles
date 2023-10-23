@@ -1,7 +1,7 @@
 ---
 - name: Load env.yml
   include_vars:
-    file: "{{ dotfiles_repo_dest | expandvars }}/zsh/env.yml"
+    file: "{{ dotfiles_repo_dest | string | expandvars }}/zsh/env.yml"
     name: zshenv
 
 - name: Create XDG Base Directories if not exist
