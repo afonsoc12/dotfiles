@@ -1,111 +1,113 @@
 ---
-- name: Load env.yml
-  include_vars:
-    file: "{{ dotfiles_repo_dest | string | expandvars }}/zsh/env.yml"
-    name: zshenv
-
-- name: Create XDG Base Directories if not exist
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  with_items:
-    - "{{ zshenv.XDG_CONFIG_HOME }}"
-    - "{{ zshenv.XDG_CACHE_HOME }}"
-    - "{{ zshenv.XDG_DATA_HOME }}"
-    - "{{ zshenv.XDG_RUNTIME_DIR }}"
-    - "{{ zshenv.XDG_STATE_HOME }}"
-
-- name: Find dotfiles directories
-  find:
-    paths: "{{ dotfiles_repo_dest }}"
-    file_type: directory
-    excludes:
-      - tasks
-  register: dotfiles_dirs
-
-- name: Process dotfiles dirs locations
-  set_fact:
-    dotfiles_dirs: "{{ dotfiles_dirs.files | map(attribute='path') }}"
-
-- name: Find dotfiles files in directories
-  find:
-    paths: "{{ dotfiles_dirs }}"
-    file_type: file
-    hidden: true
-    excludes:
-      - .DS_Store
-      - ._*
-  register: dotfiles_files_in_dirs
-
-- name: Find dotfiles files in repo root
-  find:
-    paths: "{{ dotfiles_repo_dest }}"
-    file_type: file
-    hidden: true
-    excludes:
+- vars:  # noqa name[missing]
+    dotfiles_exclude:
       - README.md
       - LICENSE
       - ansible.cfg
       - dotfiles.yml
-      - .DS_Store
       - .ansible-lint
       - .gitignore
       - .yamllint
-  register: dotfiles_files_in_repo_root
+      - .DS_Store
+      - ._*
+  block:
+    - name: Load env.yml
+      include_vars:
+        file: "{{ dotfiles_repo_dest | string | expandvars }}/zsh/env.yml"
+        name: zshenv
 
-- name: Process dotfiles files locations
-  set_fact:
-    dotfiles_files_in_dirs: "{{ dotfiles_files_in_dirs.files | map(attribute='path') }}"
-    dotfiles_files_in_repo_root: "{{ dotfiles_files_in_repo_root.files | map(attribute='path') }}"
+    - name: Create XDG Base Directories if not exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      with_items:
+        - "{{ zshenv.XDG_CONFIG_HOME }}"
+        - "{{ zshenv.XDG_CACHE_HOME }}"
+        - "{{ zshenv.XDG_DATA_HOME }}"
+        - "{{ zshenv.XDG_RUNTIME_DIR }}"
+        - "{{ zshenv.XDG_STATE_HOME }}"
 
-- name: Show all dotfiles found
-  debug:
-    msg: "{{ dotfiles_files_in_dirs + dotfiles_files_in_repo_root }}"
-    verbosity: 1
+    - name: Find dotfiles directories
+      find:
+        paths: "{{ dotfiles_repo_dest }}"
+        file_type: directory
+        excludes:
+          - tasks
+      register: dotfiles_dirs
 
-- name: Create directories for dotfiles
-  file:
-    path: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}"
-    state: directory
-    mode: "0700"
-  with_items: "{{ dotfiles_files_in_dirs }}"
+    - name: Process dotfiles dirs locations
+      set_fact:
+        dotfiles_dirs: "{{ dotfiles_dirs.files | map(attribute='path') }}"
 
-- name: Link dotfiles to $XDG_CONFIG_HOME
-  file:
-    src: "{{ item }}"
-    dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}/{{ item | basename }}"
-    state: link
-    force: true
-    mode: 0644
-  with_items: "{{ dotfiles_files_in_dirs }}"
+    - name: Find dotfiles files in directories
+      find:
+        paths: "{{ dotfiles_dirs }}"
+        file_type: file
+        hidden: true
+        excludes: "{{ dotfiles_exclude }}"
+      register: dotfiles_files_in_dirs
 
-- name: Link dotfiles to $HOME
-  file:
-    src: "{{ item }}"
-    # dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item }}"
-    dest: "{{ ansible_env.HOME }}/{{ item | basename }}"
-    state: link
-    force: true
-    mode: 0644
-  with_items: "{{ dotfiles_files_in_repo_root }}"
+    - name: Find dotfiles files in repo root
+      find:
+        paths: "{{ dotfiles_repo_dest }}"
+        file_type: file
+        hidden: true
+        excludes: "{{ dotfiles_exclude }}"
+      register: dotfiles_files_in_repo_root
 
-- name: Create entrypoint /etc/zshenv
-  become: true
-  blockinfile:
-    dest: /etc/zshenv
-    create: true
-    mode: "0444"
-    content: |
-      export ZDOTDIR=$HOME/.config/zsh
-      . $ZDOTDIR/.zshenv
+    - name: Process dotfiles files locations
+      set_fact:
+        dotfiles_files_in_dirs: "{{ dotfiles_files_in_dirs.files | map(attribute='path') }}"
+        dotfiles_files_in_repo_root: "{{ dotfiles_files_in_repo_root.files | map(attribute='path') }}"
 
-- name: Create env.zsh from env.yml
-  blockinfile:
-    create: true
-    dest: "{{ zshenv.ZDOTDIR | expandvars }}/env.zsh"
-    mode: "0600"
-    block: |
-      {% for key, value in zshenv.items() %}
-      export {{ key }}="{{ value }}"
-      {% endfor %}
+    - name: Show all dotfiles found
+      debug:
+        msg: "{{ dotfiles_files_in_dirs + dotfiles_files_in_repo_root }}"
+        verbosity: 1
+
+    - name: Create directories for dotfiles
+      file:
+        path: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}"
+        state: directory
+        mode: "0700"
+      with_items: "{{ dotfiles_files_in_dirs }}"
+
+    - name: Link dotfiles to $XDG_CONFIG_HOME
+      file:
+        src: "{{ item }}"
+        dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}/{{ item | basename }}"
+        state: link
+        force: true
+        mode: 0644
+      with_items: "{{ dotfiles_files_in_dirs }}"
+
+    - name: Link dotfiles to $HOME
+      file:
+        src: "{{ item }}"
+        # dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item }}"
+        dest: "{{ ansible_env.HOME }}/{{ item | basename }}"
+        state: link
+        force: true
+        mode: 0644
+      with_items: "{{ dotfiles_files_in_repo_root }}"
+
+    - name: Create entrypoint /etc/zshenv
+      become: true
+      blockinfile:
+        dest: /etc/zshenv
+        create: true
+        mode: "0444"
+        content: |
+          export ZDOTDIR=$HOME/.config/zsh
+          . $ZDOTDIR/.zshenv
+
+    - name: Create env.zsh from env.yml
+      blockinfile:
+        create: true
+        dest: "{{ zshenv.ZDOTDIR | expandvars }}/env.zsh"
+        mode: "0600"
+        block: |
+          {% for key, value in zshenv.items() %}
+          export {{ key }}="{{ value }}"
+          {% endfor %}
