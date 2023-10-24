@@ -35,6 +35,7 @@
     hidden: true
     excludes:
       - .DS_Store
+      - ._*
   register: dotfiles_files_in_dirs
 
 - name: Find dotfiles files in repo root
@@ -96,7 +97,7 @@
     create: true
     mode: "0444"
     content: |
-      export ZDOTDIR=${ZDOTDIR:-$HOME/.config/zsh}
+      export ZDOTDIR=$HOME/.config/zsh
       . $ZDOTDIR/.zshenv
 
 - name: Create env.zsh from env.yml

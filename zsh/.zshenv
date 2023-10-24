@@ -3,7 +3,7 @@
 #`.zshenv' should not contain commands that produce output or assume the shell is attached to a tty.
 #
 # The following lines need to be placed in /etc/zshenv or ~/.zshenv:
-#    export ZDOTDIR=${ZDOTDIR:-$HOME/.config/zsh}
-#    echo ". $ZDOTDIR/.zshenv" > ~/.zshenv
+#    export ZDOTDIR=$HOME/.config/zsh
+#    echo ". $ZDOTDIR/.zshenv"
 
 source $ZDOTDIR/env.zsh
