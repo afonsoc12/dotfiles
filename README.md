@@ -50,31 +50,32 @@ dotfiles commit -m "Add .zshrc"
 dotfiles push
 ```
 
-## Start From Scratch
+## Development
 
-1. Initialise empty bare repository
+### Installation
 
-    ```bash
-    git init --bare $HOME/.config/dotfiles
+1. Create virtualenv
+
+    ```shell
+    pyenv virtualenv dotfiles
+    pyenv acticate dotfiles
+    # or
+
+    python -m venv venv
+    source venv/bin/activate
     ```
 
-2. Create an alias for `git` command. `dotfiles` can be used for all git-related operations.
+2. Install requirements.txt file
 
-    ```bash
-    # Don't forget to source shell after this command
-    alias dotfiles="/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME" >> ~/.zshrc
+    ```shell
+    pip install -r requirements.txt
     ```
 
-3. Set git to not show untracked files
+### Linting
 
-    ```bash
-    dotfiles config --local status.showUntrackedFiles no
-    ```
+Two linters setup: [yamllint](https://yamllint.readthedocs.io/en/stable/) and [ansible-lint](https://ansible.readthedocs.io/projects/lint). To run them:
 
-4. Configure remote (assume repo already created)
-
-    ```bash
-    dotfiles remote add origin git@github.com:<USERNAME>/dotfiles.git
-    dotfiles branch -M master
-    dotfiles push -u origin master
-    ```
+```shell
+yamllint .
+ansible-lint
+```

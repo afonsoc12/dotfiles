@@ -5,6 +5,7 @@
       - LICENSE
       - ansible.cfg
       - dotfiles.yml
+      - requirements.txt
       - .ansible-lint
       - .gitignore
       - .yamllint

@@ -20,15 +20,15 @@ jobs:
 
     env:
       ANSIBLE_FORCE_COLOR: '1'
-      ANSIBLE_HOME: $HOME/.local/share/ansible
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Ansible
+      - name: Install dependencies
         run: |
-          pip3 install --upgrade ansible ansible-lint yamllint
+          pip3 install --upgrade pip
+          pip3 install -r requirements.txt
 
       - name: Linting
         run: |
