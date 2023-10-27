@@ -4,6 +4,7 @@
 
   vars:
     dotfiles_repo_dest: "{{ playbook_dir }}"
+    dotfiles_use_links: true
 
   tasks:
     - name: Run all tasks in folder tasks/

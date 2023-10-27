@@ -74,24 +74,43 @@
         mode: "0700"
       with_items: "{{ dotfiles_files_in_dirs }}"
 
-    - name: Link dotfiles to $XDG_CONFIG_HOME
-      file:
-        src: "{{ item }}"
-        dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}/{{ item | basename }}"
-        state: link
-        force: true
-        mode: 0644
-      with_items: "{{ dotfiles_files_in_dirs }}"
+    - name: Link dotfiles
+      when: dotfiles_use_links
+      block:
+        - name: Link dotfiles to $XDG_CONFIG_HOME
+          file:
+            src: "{{ item }}"
+            dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}/{{ item | basename }}"
+            state: link
+            force: true
+            mode: 0644
+          with_items: "{{ dotfiles_files_in_dirs }}"
 
-    - name: Link dotfiles to $HOME
-      file:
-        src: "{{ item }}"
-        # dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item }}"
-        dest: "{{ ansible_env.HOME }}/{{ item | basename }}"
-        state: link
-        force: true
-        mode: 0644
-      with_items: "{{ dotfiles_files_in_repo_root }}"
+        - name: Link dotfiles to $HOME
+          file:
+            src: "{{ item }}"
+            dest: "{{ ansible_env.HOME }}/{{ item | basename }}"
+            state: link
+            force: true
+            mode: 0644
+          with_items: "{{ dotfiles_files_in_repo_root }}"
+
+    - name: Copy dotfiles
+      when: not dotfiles_use_links
+      block:
+        - name: Copy dotfiles to $XDG_CONFIG_HOME
+          copy:
+            src: "{{ item }}"
+            dest: "{{ zshenv.XDG_CONFIG_HOME }}/{{ item | dirname | basename }}/{{ item | basename }}"
+            mode: 0644
+          with_items: "{{ dotfiles_files_in_dirs }}"
+
+        - name: Copy dotfiles to $HOME
+          copy:
+            src: "{{ item }}"
+            dest: "{{ ansible_env.HOME }}/{{ item | basename }}"
+            mode: 0644
+          with_items: "{{ dotfiles_files_in_repo_root }}"
 
     - name: Create entrypoint /etc/zshenv
       become: true
