@@ -2,7 +2,6 @@
 alias cdd="cd ~/Desktop"
 alias cdh="cd ~"
 alias v="ls -alh"
-alias dotfiles="/usr/bin/git --git-dir=$XDG_CONFIG_HOME/dotfiles --work-tree=$XDG_CONFIG_HOME"
 
 # Kubernetes aliases
 alias k="kubectl"

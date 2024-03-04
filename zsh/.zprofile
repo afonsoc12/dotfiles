@@ -10,3 +10,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # pyenv (for login shells, both interactive non-interactive shells)
 command -v pyenv >/dev/null && eval "$(pyenv init -)"
 $(pyenv virtualenv --version > /dev/null 2>&1) && eval "$(pyenv virtualenv-init -)"
+
+# jEnv
+export PATH="$HOME/.jenv/bin:$PATH"
+command -v jenv >/dev/null && eval "$(jenv init -)"
