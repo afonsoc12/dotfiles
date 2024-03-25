@@ -1,7 +1,7 @@
 # General
 alias cdd="cd ~/Desktop"
 alias cdh="cd ~"
-alias v="ls -alh"
+command -v eza >/dev/null && alias v="eza -lah" || alias v="ls -lah"
 
 # Kubernetes aliases
 alias k="kubectl"
