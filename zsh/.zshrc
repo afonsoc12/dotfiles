@@ -8,8 +8,7 @@ echo "On .zshrc"
 # oh-my-zsh
 export ZSH=$XDG_DATA_HOME/oh-my-zsh
 
-ZSH_THEME="random"
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" "fino-time")
+ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "fino-time")
 COMPLETION_WAITING_DOTS="true"
 
 zstyle ':omz:update' frequency 15
